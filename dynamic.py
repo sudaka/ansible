@@ -1,5 +1,6 @@
 import sys
 import argparse
+from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 
 class Hostinfo():
     def __init__(self, name='inname') -> None:
@@ -77,10 +78,10 @@ class Groups():
         for key,val in self.gdict.items():
             td = dict(hosts=val,vars="")
             outdict[key] = td
-        out = dict(outdict, _meta=outf)
-        return str(out)
+        out = str(dict(outdict, _meta=outf))
+        return out.replace("'",'"')
 
-def createParser ():
+def createParser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', nargs='?')
     parser.add_argument('--list', action='store_const', const=True)
