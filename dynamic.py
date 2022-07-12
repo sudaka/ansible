@@ -1,3 +1,4 @@
+#/usr/bin/python3
 import sys
 import argparse
 
@@ -20,7 +21,7 @@ class Hostinfo():
         return props
 
     def sethost(self, host):
-        self.ansible_ssh_host = host
+        self.ansible_host = host
 
 class Groupinfo():
     def __init__(self, gname) -> None:
@@ -75,7 +76,7 @@ class Groups():
         outf = dict(hostvars=outh)
         outdict = {}
         for key,val in self.gdict.items():
-            td = dict(hosts=val,vars="")
+            td = dict(hosts=val) # можно добавить список vars: vd = dict(envone='one',envtwo='two'), затем td = dict(hosts=val,vars=vd)
             outdict[key] = td
         out = str(dict(outdict, _meta=outf))
         return out.replace("'",'"')
