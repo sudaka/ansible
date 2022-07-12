@@ -1,6 +1,5 @@
 import sys
 import argparse
-from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 
 class Hostinfo():
     def __init__(self, name='inname') -> None:
