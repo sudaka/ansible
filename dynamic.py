@@ -1,13 +1,15 @@
 import sys
 import argparse
 
+class Hostinfo():
+    def __init__(self, host='127.0.0.1') -> None:
+        self.ansible_ssh_host = host
+
 def createParser ():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', nargs='?')
     parser.add_argument('--list', action='store_const', const=True)
     return parser
-
-
 
 def gethost(hostname):
     hostname1={ "ansible_ssh_host":  "127.0.0.1",  "ansible_ssh_port":  22, "ansible_ssh_user":  "sergey"}
