@@ -73,7 +73,11 @@ class Groups():
         for host in self.hosts.values():
             outh[host.name] = host.getdict()
         outf = dict(hostvars=outh)
-        out = dict(self.gdict, _meta=outf)
+        outdict = {}
+        for key,val in self.gdict.items():
+            td = dict(hosts=val,vars="")
+            outdict[key] = td
+        out = dict(outdict, _meta=outf)
         return str(out)
 
 def createParser ():
@@ -82,24 +86,11 @@ def createParser ():
     parser.add_argument('--list', action='store_const', const=True)
     return parser
 
-def gethost(hostname):
-    hostname1={ "ansible_ssh_host":  "127.0.0.1",  "ansible_ssh_port":  22, "ansible_ssh_user":  "sergey"}
-    hostname2={ "ansible_ssh_host":  "127.0.0.2",  "ansible_ssh_port":  22, "ansible_ssh_user":  "sergey"}
-    hostsinfo = {"main": hostname1, "sec": hostname2}
-    hostinfo = hostsinfo.get(hostname)
-    return hostinfo
-
 def testinit():
-    m1 = Hostinfo(name='first')
-    m1.sethost('127.0.0.1')
-    m3 = Hostinfo(name='second')
-    m3.sethost('127.0.0.1')
+    m1 = Hostinfo(name='testserver')
+    m1.sethost('192.168.1.195')
     m2 = Groups()
-    m2.addhostgroup('test1', m1)
-    m2.addhostgroup('test1', m3)
-    m2.addhostgroup('test2', m1)
-    m2.addhostgroup('test2', m3)
-    #m2.delhost(m1)
+    m2.addhostgroup('webservers', m1)
     return m2
 
 if __name__ == '__main__':
