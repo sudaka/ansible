@@ -23,23 +23,19 @@ class Hostinfo():
     def sethost(self, host):
         self.ansible_host = host
 
-class Groupinfo():
-    def __init__(self, gname) -> None:
-        self.gname = gname
-        self.glist = []
-
-class Groups():
+class GroupsInfo():
     def __init__(self) -> None:
-        self.gdict = {}
+        self.groups = {}
         self.hosts = {}
+        self.vars = {}
 
     def addgroup(self, gname):
-        if gname not in self.gdict.keys():
-            self.gdict[gname] = []
+        if gname not in self.groups.keys():
+            self.groups[gname] = []
     
     def delgroup(self, gname):
-        if gname in self.gdict.keys():
-            del self.gdict[gname]
+        if gname in self.groups.keys():
+            del self.groups[gname]
     
     def addhost(self, tmphost=Hostinfo()):
         if tmphost.name not in self.hosts.keys():
@@ -49,7 +45,7 @@ class Groups():
         hostname = thost.name
         if hostname in self.hosts.keys():
             del self.hosts[hostname]
-            for tmpg in self.gdict.values():
+            for tmpg in self.groups.values():
                 if hostname in tmpg:
                     tmpg.remove(hostname)
 
@@ -58,28 +54,25 @@ class Groups():
             return(self.hosts[hostname].getdict())
         return ''
 
-    def addhostgroup(self, gname, tmphost=Hostinfo()):
+    def addhostgroup(self, gname='unnamed', tmphost=Hostinfo()):
         self.addgroup(gname)
-        if tmphost.name not in self.gdict[gname]:
-            self.gdict[gname].append(tmphost.name)
+        if tmphost.name not in self.groups[gname]:
+            self.groups[gname].append(tmphost.name)
         self.addhost(tmphost=tmphost)
 
     def delhostgroup(self, gname, tmphost=Hostinfo()):
-        if gname in self.gdict.keys():
-            if tmphost.name in self.gdict[gname]:
-                self.gdict[gname].remove(tmphost.name)
+        if gname in self.groups.keys():
+            if tmphost.name in self.groups[gname]:
+                self.groups[gname].remove(tmphost.name)
     
     def __str__(self) -> str:
-        outh = {}
+        resinfo = {'_meta':{'hostvars':{}}}
         for host in self.hosts.values():
-            outh[host.name] = host.getdict()
-        outf = dict(hostvars=outh)
-        outdict = {}
-        for key,val in self.gdict.items():
-            td = dict(hosts=val) # можно добавить список vars: vd = dict(envone='one',envtwo='two'), затем td = dict(hosts=val,vars=vd)
-            outdict[key] = td
-        out = str(dict(outdict, _meta=outf))
-        return out.replace("'",'"')
+            resinfo['_meta']['hostvars'][host.name] = host.getdict()
+        for key,val in self.groups.items(): # можно добавить список vars: vd = dict(envone='one',envtwo='two'), затем td = dict(hosts=val,vars=vd)
+            resinfo[key] = dict(hosts=val)
+        strout = str(resinfo)
+        return strout.replace("'",'"')
 
 def createParser():
     parser = argparse.ArgumentParser()
@@ -90,7 +83,7 @@ def createParser():
 def testinit():
     m1 = Hostinfo(name='testserver')
     m1.sethost('192.168.1.195')
-    m2 = Groups()
+    m2 = GroupsInfo()
     m2.addhostgroup('webservers', m1)
     return m2
 
