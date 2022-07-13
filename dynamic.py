@@ -5,18 +5,19 @@ import argparse
 class Hostinfo():
     def __init__(self, name='inname') -> None:
         self.name = name
+        self.ignorenames = ['name', 'ignorenames']
     
     def __str__(self) -> str:
         props = {}
         for (name,value) in self.__dict__.items():
-            if name.find('ansible')>-1:
+            if name.find('ansible') ==0:
                 props[name] = value
         return str(props)
 
     def getdict(self):
         props = {}
         for (name,value) in self.__dict__.items():
-            if name.find('ansible')>-1:
+            if name not in self.ignorenames:
                 props[name] = value
         return props
 
@@ -27,7 +28,7 @@ class GroupsInfo():
     def __init__(self) -> None:
         self.groups = {'unnamed':[]}
         self.hosts = {}
-        self.vars = {}
+        self.groupvars = {}
 
     def addgroup(self, gname):
         if gname not in self.groups.keys():
@@ -83,7 +84,8 @@ class GroupsInfo():
         for host in self.hosts.values():
             resinfo['_meta']['hostvars'][host.name] = host.getdict()
         for key,val in self.groups.items(): # можно добавить список vars: vd = dict(envone='one',envtwo='two'), затем td = dict(hosts=val,vars=vd)
-            resinfo[key] = dict(hosts=val)
+            if len(val) > 0:
+                resinfo[key] = dict(hosts=val)
         strout = str(resinfo)
         return strout.replace("'",'"')
 
@@ -96,11 +98,12 @@ def createParser():
 def testinit():
     m1 = Hostinfo(name='testserver')
     m1.sethost('192.168.1.195')
-    m2 = Hostinfo(name='testserver1')
-    m2.sethost('192.168.1.195')
+    m1.key_file = "/etc/nginx/ssl/nginx.key"
+    m1.cert_file = "/etc/nginx/ssl/nginx.crt"
+    m1.conf_file = "/etc/nginx/sites-available/default"
+    m1.server_name = "ansible.bobrobotirk.ru" 
     myall = GroupsInfo()
     myall.addhostgroup('webservers', m1)
-    myall.addhost(tmphost=m2)
     return myall
 
 if __name__ == '__main__':
