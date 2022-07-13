@@ -36,6 +36,16 @@ class GroupsInfo():
     def delgroup(self, gname):
         if gname in self.groups.keys():
             del self.groups[gname]
+
+    def checkhostswithoutgroups(self):
+        withoutgroup = True
+        for host in self.hosts.keys:
+            for group in self.groups.values():
+                if host.name in group:
+                    withoutgroup = False
+                    break
+            if withoutgroup:
+                self.addhostgroup(tmphost=self.hosts[host])
     
     def addhost(self, tmphost=Hostinfo()):
         if tmphost.name not in self.hosts.keys():
@@ -59,6 +69,8 @@ class GroupsInfo():
         if tmphost.name not in self.groups[gname]:
             self.groups[gname].append(tmphost.name)
         self.addhost(tmphost=tmphost)
+        if tmphost.name in self.groups['unnamed']:
+            self.groups['unnamed'].remove(tmphost.name)
 
     def delhostgroup(self, gname, tmphost=Hostinfo()):
         if gname in self.groups.keys():
@@ -66,6 +78,7 @@ class GroupsInfo():
                 self.groups[gname].remove(tmphost.name)
     
     def __str__(self) -> str:
+        self.checkhostswithoutgroups()
         resinfo = {'_meta':{'hostvars':{}}}
         for host in self.hosts.values():
             resinfo['_meta']['hostvars'][host.name] = host.getdict()
@@ -83,9 +96,12 @@ def createParser():
 def testinit():
     m1 = Hostinfo(name='testserver')
     m1.sethost('192.168.1.195')
-    m2 = GroupsInfo()
-    m2.addhostgroup('webservers', m1)
-    return m2
+    m2 = Hostinfo(name='testserver')
+    m2.sethost('192.168.1.195')
+    myall = GroupsInfo()
+    myall.addhostgroup('webservers', m1)
+    myall.addhost(tmphost=m2)
+    return myall
 
 if __name__ == '__main__':
     parser = createParser()
